@@ -1,0 +1,7 @@
+-if session[:logged_in].nil?
+    h1 How did you get here?
+    a href="/" Hompage
+-else   
+    h1 Welcome back, #{session[:logged_in]}! 
+    form action="/logout" method="post"
+        input type="submit" value="login'nt"
