@@ -1,0 +1,10 @@
+h2 Register
+form action="/register" method="post"    
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" name="password_verify" placeholder="Verify Password" required>
+    <input type="text" name="game_user" placeholder="Ingame Username" required>
+    <input type="submit" value="Register">
+
+    -if session[:regerror] != nil
+        p = session[:regerror]

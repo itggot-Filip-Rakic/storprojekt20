@@ -2,17 +2,40 @@ require "slim"
 require "sinatra"
 require "sqlite3"
 require "bcrypt"
+require 'net/http'
 enable :sessions
 
 db = SQLite3::Database.new("db/database.db")
 db.results_as_hash = true
 
+
+def validate_game_user(game_user)
+    uri = URI("https://api.mojang.com/users/profiles/minecraft/#{game_user}")
+    Net::HTTP.start(uri.host, uri.port,
+        :use_ssl => uri.scheme == 'https') do |http|
+        request = Net::HTTP::Get.new uri
+      
+        response = http.request request # Net::HTTPResponse object
+        p response.code
+        return response.code == "200"
+      end
+      return false
+end
+
 get("/") do 
     slim(:index)
 end
 
-get("/reglog") do 
-    slim(:reglog)
+get("/users/new") do 
+    slim(:"users/new")
+end
+
+get("/users/index") do 
+    slim(:"users/index")
+end
+
+get("/users/error") do
+    slim(:"users/error")
 end
 
 get("/login") do
@@ -26,22 +49,33 @@ end
 
 post("/register") do 
     username = params[:username]
+    game_user = params[:game_user]
     password = params[:password]
     password_verify = params[:password_verify]
 
-    if password != password_verify || username == "" || password == ""
-        redirect("/password_do_not_match")
-    end
+    exist_user = db.execute("SELECT username FROM user WHERE username = ?", username)
+    exist_gameuser = db.execute("SELECT gameuser FROM user WHERE gameuser = ?", game_user )
 
-    exist = db.execute("SELECT username FROM user WHERE username LIKE ?", username)
+    if !exist_user.empty?
+        session[:regerror] = "Username is already taken!"
+        redirect("/users/new")
+    elsif password != password_verify
+        session[:regerror] = "Password doesn't match!"
+        redirect("/users/new")
+    elsif validate_game_user(game_user) == false
+        session[:regerror] = "Ingame username dosen't exist! :O"
+        redirect("/users/new")
+    end
+    
+    
     password_scramble = BCrypt::Password.create(password)
 
-    if exist.empty?
-        db.execute("INSERT INTO user(username, password) VALUES(?, ?)", username, password_scramble)
+    if exist_user.empty?
+        db.execute("INSERT INTO user(username, password, gameuser) VALUES(?, ?, ?)", username, password_scramble, game_user)
     else
-        redirect("/username_exist")
+        redirect("/users/username_exist")
     end
-    redirect("/")
+    redirect("/login")
 end
 
 post("/login_verify") do
@@ -52,7 +86,7 @@ post("/login_verify") do
     #Kollar ifall Användaren finns
     exist = db.execute("SELECT username FROM user WHERE username LIKE ?", username)
     if exist.empty?
-        redirect("/error")
+        redirect("/users/error")
     end
 
     #Hämtar användarens lödsenord för jämförelse
@@ -64,18 +98,6 @@ post("/login_verify") do
     else
         redirect("/error")
     end
-end
-
-get("/error") do
-    slim(:error)
-end
-
-get("/password_do_not_match") do 
-    slim(:password_do_not_match)
-end
-
-get("/username_exist") do 
-    slim(:username_exist)
 end
 
 post("/logout") do 
