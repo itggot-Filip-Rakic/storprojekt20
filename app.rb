@@ -1,5 +1,6 @@
 require "slim"
 require "sinatra"
+require "byebug"
 require "sqlite3"
 require "bcrypt"
 require 'net/http'
@@ -22,7 +23,7 @@ get("/users/error") do
     slim(:"users/error")
 end
 
-post("/register") do 
+post("/users/register") do 
     username = params[:username]
     game_user = params[:game_user]
     password = params[:password]
@@ -31,15 +32,15 @@ post("/register") do
     response = register(username, game_user, password, password_verify)
 
     if response.successful then
-        session[] = response.data
-        redirect("/login")
+        session[:logged_in] = response.data
+        redirect("/")
     else
         session[:regerror] = response.data
         redirect("/users/new")
     end 
 end
 
-post("/login_verify") do
+post("/users/login") do
     username = params[:username]
     password = params[:password]
     session[:logged_in] = nil
@@ -54,7 +55,7 @@ post("/login_verify") do
     end
 end
 
-post("/logout") do 
+post("/users/logout") do 
     session[:logged_in] = nil
     redirect("/")
 end

@@ -1,6 +1,7 @@
 require "sqlite3"
 require "bcrypt"
 require 'net/http'
+require 'byebug'
 
 $db = SQLite3::Database.new("db/database.db")
 $db.results_as_hash = true
@@ -33,7 +34,6 @@ public def loggedinq(logged_in)
     user_id = $db.execute("SELECT user_id FROM user WHERE username LIKE ?", logged_in)[0]["user_id"]
 end 
 
-
 public def register(username, game_user, password, password_verify)
     exist_user = $db.execute("SELECT username FROM user WHERE username = ?", username)
     exist_gameuser = $db.execute("SELECT gameuser FROM user WHERE gameuser = ?", game_user )
@@ -43,13 +43,21 @@ public def register(username, game_user, password, password_verify)
     elsif password != password_verify
         return ModelResponse.new(false, "Password doesn't match!")
     elsif validate_game_user(game_user) == false
-        return ModelResponse.new(false, "Ingame username dosen't exist! :O")
+        return ModelResponse.new(false, "Ingame username dosen't exist! :O") 
     end
 
     password_scramble = BCrypt::Password.create(password)
 
     if exist_user.empty?
-        $db.execute("INSERT INTO user(username, password, gameuser) VALUES(?, ?, ?)", username, password_scramble, game_user)
+        begin
+            $db.execute("INSERT INTO user(username, password, gameuser) VALUES(?, ?, ?)", username, password_scramble, game_user)
+        rescue => exception
+            p exception
+            p exception.message
+            if (exception.message == "UNIQUE constraint failed: user.gameuser")
+                return ModelResponse.new(false, "Ingame username already taken!")
+            end
+        end
         return ModelResponse.new(true, nil)
     end
     return ModelResponse.new(false, "How did u get here??")
@@ -67,6 +75,5 @@ public def login_verify(username, password)
         return ModelResponse.new(true, nil)
     else
         return ModelResponse.new(false, nil)
-        redirect("/error")
     end
 end
