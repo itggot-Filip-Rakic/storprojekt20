@@ -1,9 +1,13 @@
 a href="/" Home
 
 h2 Log in
-form action="/users/login" method="post"    
-    input type="text" name="username" placeholder="Användarnamn"
-    input type="password" name="password" placeholder="Lösenord"
-    input type="submit" value="Logga in"
+form action="/users/login" method="post"
+    p Username
+    input type="text" name="username"
+    p Password
+    input type="password" name="password"
+    input type="submit" value="Login"
+    - if session[:login_error] != nil
+        p = session[:login_error]
 
 
