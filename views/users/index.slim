@@ -1,7 +1,5 @@
-a href="/" Home
-
-h2 Log in
-form action="/users/login" method="post"
+h1 Login
+form action="/users/" method="post"
     p Username
     input type="text" name="username"
     p Password
@@ -9,5 +7,3 @@ form action="/users/login" method="post"
     input type="submit" value="Login"
     - if session[:login_error] != nil
         p = session[:login_error]
-
-

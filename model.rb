@@ -30,6 +30,24 @@ def validate_game_user(game_user)
     return false
 end
 
+#
+# Get different items from database depending on the arguments
+#
+# @param [String] column The column to be searched
+# @param [String] table The table to be searched
+# @param [String] where Optional argument if you want to retrieve SQL rows where a specific value matches
+# @param [String] value The value to be searched
+#
+# @return [Hash] A hash with retrieved items from SQL database
+#
+def get_from_db(column, table, where, value)
+    if where.nil? || value.nil?
+        return db.execute("SELECT #{column} FROM #{table}")
+    else
+        return db.execute("SELECT #{column} FROM #{table} WHERE #{where} = ?",value)
+    end
+end
+
 public def loggedinq(logged_in)
     user_id = $db.execute("SELECT user_id FROM user WHERE username LIKE ?", logged_in)[0]["user_id"]
 end 

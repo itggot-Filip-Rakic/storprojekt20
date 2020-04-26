@@ -6,5 +6,19 @@ html lang="en"
         meta http-equiv="X-UA-Compatible" content="ie=edge"/
         title Forum
     body
-    
+        nav
+            h1 Homepage
+            a href="/" Home
+            - if session[:user_id] != nil
+                form action="/logout" method="post"
+                    input type="submit" value="Logout"
+                a href="/users/show/#{session[:user_id]}" My Posts
+                a href="/ads/new" Create a new forumpost
+                a href="#" Welcome back #{session[:username]}!
+                -if session[:rank] == "admin"
+                    a href="/admin" Admin page
+            -else
+                a href="/users/index" Login
+                a href="/users/new" Register
+
         ==yield
