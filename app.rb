@@ -123,6 +123,8 @@ get('/users/show/:user_id') do
         my_posts = get_public_posts(user_id)
     end
     user = get_from_db("username","user","user_id",user_id)[0]
+    p user
+    p my_posts
 
     slim(:"users/show",locals:{my_posts: my_posts,user: user})
 end

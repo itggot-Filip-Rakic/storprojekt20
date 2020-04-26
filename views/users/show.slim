@@ -5,10 +5,10 @@
 
 div
     -my_posts.each do |post|
-        a class="container" href="/posts/#{post["post_id"]}"
+        a class="container" href="/posts/#{post["post_id"].to_i}"
             h3 = post["name"] 
-            p = post["written"]}
-            -if ad["public"] == "on"
+            p = post["written"]
+            -if post["public"] == "on"
                 p Public? Yes
             -else
                 p Public? No
