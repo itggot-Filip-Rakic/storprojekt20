@@ -11,9 +11,6 @@ enable :sessions
 
 
 before do 
-    if session[:user_id] != nil 
-        redirect('/')
-    end
         if request.post?
             if session[:last_action].nil?
                 session[:last_action] = Time.now
@@ -24,7 +21,13 @@ before do
             session[:last_action] = Time.now()
             session[:regerror] = nil
         end
-    end
+    
+end
+
+#before('/') do
+#     session[:user_id] = 2
+#     session[:username] = "Edvin"
+#end
 
 get("/") do 
     slim(:index)
@@ -74,7 +77,7 @@ end
 # 
 # @see Model#get_from_db
 # 
-post('/users/') do
+post('/users') do
     username = params[:username]
     password = params[:password]
     
@@ -85,7 +88,7 @@ post('/users/') do
         redirect("/users/")
     end
 
-    password_for_user = get_from_db("password_digest","user","username",username)[0]["password_digest"]
+    password_for_user = get_from_db("password","user","username",username)[0]["password"]
 
     if BCrypt::Password.new(password_for_user) != password
         session[:login_error] = "Username or password wrong"
@@ -99,10 +102,30 @@ post('/users/') do
     redirect("/")
 end
 
+
 # 
 # Logs out user and destroys all session cookies
 # 
-post("/users/logout") do 
+post("/logout") do 
     session.destroy
     redirect("/")
 end
+
+get('/users/show/:user_id') do 
+    user_id = params[:user_id].to_i
+
+    if user_id == session[:user_id]
+        my_posts = get_from_db("*","post","user_id",user_id)
+    else
+        my_posts = get_public_posts(user_id)
+    end
+    user = get_from_db("username","user","user_id",user_id)[0]
+
+    slim(:"users/show",locals:{my_posts: my_posts,user: user})
+end
+
+get('/posts/new') do 
+    if not_auth(session[:user_id])
+        redirect('/')
+    end
+    slim(:"posts/new")

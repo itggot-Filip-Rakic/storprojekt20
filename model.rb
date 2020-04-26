@@ -3,8 +3,11 @@ require "bcrypt"
 require 'net/http'
 require 'byebug'
 
-$db = SQLite3::Database.new("db/database.db")
-$db.results_as_hash = true
+def db()
+    db = SQLite3::Database.new("db/database.db")
+    db.results_as_hash = true
+    return db
+end
 
 class ModelResponse
     @successful
@@ -48,13 +51,9 @@ def get_from_db(column, table, where, value)
     end
 end
 
-public def loggedinq(logged_in)
-    user_id = $db.execute("SELECT user_id FROM user WHERE username LIKE ?", logged_in)[0]["user_id"]
-end 
-
 public def register(username, game_user, password, password_verify)
-    exist_user = $db.execute("SELECT username FROM user WHERE username = ?", username)
-    exist_gameuser = $db.execute("SELECT gameuser FROM user WHERE gameuser = ?", game_user )
+    exist_user = db.execute("SELECT username FROM user WHERE username = ?", username)
+    exist_gameuser = db.execute("SELECT gameuser FROM user WHERE gameuser = ?", game_user )
 
     if !exist_user.empty?
         return ModelResponse.new(false, "Username is already taken!")
@@ -68,7 +67,7 @@ public def register(username, game_user, password, password_verify)
 
     if exist_user.empty?
         begin
-            $db.execute("INSERT INTO user(username, password, gameuser) VALUES(?, ?, ?)", username, password_scramble, game_user)
+            db.execute("INSERT INTO user(username, password, gameuser) VALUES(?, ?, ?)", username, password_scramble, game_user)
         rescue => exception
             p exception
             p exception.message
@@ -82,16 +81,27 @@ public def register(username, game_user, password, password_verify)
 end
 
 public def login_verify(username, password)
-    exist = $db.execute("SELECT username FROM user WHERE username LIKE ?", username)
+    exist = db.execute("SELECT username FROM user WHERE username LIKE ?", username)
     if exist.empty?
         return ModelResponse.new(false, nil)
     end
 
-    controll_password = $db.execute("SELECT password FROM user WHERE username LIKE ?", username)[0]["password"]
+    controll_password = db.execute("SELECT password FROM user WHERE username LIKE ?", username)[0]["password"]
 
     if BCrypt::Password.new(controll_password) == password
         return ModelResponse.new(true, nil)
     else
         return ModelResponse.new(false, nil)
     end
+end
+
+    #
+    # Gets all the public ads from a user
+    #
+    # @param [Integer] user_id Id of a user
+    #
+    # @return [Hash] Hash with all the public posts of specific user.
+    #
+def get_public_posts(user_id)
+    return db.execute("SELECT * FROM post WHERE user_id = ? AND public = ?",user_id, "on")
 end

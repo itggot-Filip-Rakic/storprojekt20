@@ -1,0 +1,14 @@
+-if !user.nil?
+    h1 #{user["username"]}s posts
+-else
+    h1 A user with that id or username doesn't exist
+
+div
+    -my_posts.each do |post|
+        a class="container" href="/posts/#{post["post_id"]}"
+            h3 = post["name"] 
+            p = post["written"]}
+            -if ad["public"] == "on"
+                p Public? Yes
+            -else
+                p Public? No
