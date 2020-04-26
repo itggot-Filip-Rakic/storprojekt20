@@ -6,6 +6,7 @@ require "bcrypt"
 require 'net/http'
 require "byebug"
 require_relative './model.rb'
+include Model
 
 enable :sessions
 
@@ -99,7 +100,9 @@ post('/users') do
 
     session[:username] = username
     session[:rank] = get_from_db("rank","user","username",username)[0]["rank"]
+    p session[:rank]
     redirect("/")
+    
 end
 
 
@@ -125,7 +128,8 @@ get('/users/show/:user_id') do
 end
 
 get('/posts/new') do 
-    if not_auth(session[:user_id])
+    if not_authenticated(session[:user_id])
         redirect('/')
     end
     slim(:"posts/new")
+end

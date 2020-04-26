@@ -14,9 +14,9 @@ html lang="en"
                 form action="/logout" method="post"
                     input type="submit" value="Logout"
                 a href="/users/show/#{session[:user_id]}" My Posts
-                a href="/post/new" Create a new forumpost
+                a href="/posts/new" Create a new forumpost
                 -if session[:rank] == "admin"
-                    a href="/admin" Welcome to the admin page
+                    h1 Logged in as Admin
             -else
                 a href="/users/" Login
                 a href="/users/new" Register
