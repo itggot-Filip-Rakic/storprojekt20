@@ -106,11 +106,42 @@ module Model
     def get_public_posts(user_id)
         return db.execute("SELECT * FROM post WHERE user_id = ? AND public = ?",user_id, "on")
     end
-    def not_authenticated(user_id)
-        if user_id == nil
-            return true
+
+    def add_new_post(name,written,user_id,pstatus,time)
+        db.execute("INSERT INTO post (name, written,user_id,public,time) VALUES (?, ?, ?, ?, ?)", name, written, user_id, pstatus, time)
+        return "Ur post has been saved"
+    end 
+
+    def validate_post(name,written)
+        if name.empty? || written.empty?
+            return "You missed to fill out a field"
+        elsif name.length >= 500 || description.length >= 5000
+            return "U have reached the charater limit"
         else
-            return false
+            return nil
         end
     end
+
+    def update_ad(post_id,name,written)
+        db.execute("UPDATE post SET name = ?,written = ?, WHERE post_id = ?",name,written,post_id)
+    end
+
+    def delete_post(post_id,current_user,rank)
+        owner_id = get_from_db("user_id","post","posr_id",post_id)[0]["user_id"]
+        if current_user == owner_id || rank == "admin"
+            db.execute("PRAGMA foreign_keys = ON")
+            db.execute("DELETE FROM post WHERE post_id = ?", post_id)
+            p "success"
+        else
+            p "fail"
+        end
+    end
+        def not_authenticated(user_id)
+            if user_id == nil
+                return true
+            else
+                return false
+            end
+        end
+
 end

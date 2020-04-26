@@ -1,0 +1,22 @@
+-premission = true
+-if no_authentication
+    p You dont have premission to do this
+    -premission = false
+-elsif ad_info.nil?
+    p An post with this id doesn't exist
+    -premission = false
+
+-elsif session[:user_id] == post_info["user_id"] || session[:rank] == "admin"
+    form action="/posts/#{post_info["post_id"]}/edit" method="get"
+        button type="submit" Edit post
+
+    form action="/ads/destory" method="post"
+        button type="submit" Delete post
+
+-if premission
+    div 
+        h2 = post_info["name"]
+        p = post_info["written"]
+    div 
+        h3 Username
+        a href="/users/show/#{seller_data["user_id"]}" #{seller_data["username"]}

@@ -117,7 +117,7 @@ end
 get('/users/show/:user_id') do 
     user_id = params[:user_id].to_i
 
-    if user_id == session[:user_id]
+    if user_id == session[:user_id].to_i
         my_posts = get_from_db("*","post","user_id",user_id)
     else
         my_posts = get_public_posts(user_id)
@@ -132,4 +132,60 @@ get('/posts/new') do
         redirect('/')
     end
     slim(:"posts/new")
+end
+
+post('/posts/new') do
+    name = params[:name]
+    text = params[:written]
+    pstatus = params[:public]
+    time = Time.now.to_i
+    
+    session[:post_created] = add_new_post(name,text,session[:user_id],pstatus,time)
+
+    redirect("/posts/new")
+end
+
+get("/posts/:post_id") do
+    no_authentication = false
+    post_id = params["post_id"]
+    post_data = get_from_db("*","post","post_id",post_id)[0]
+
+    if post_data != nil
+        userdata = get_from_db("*","user","user_id",post_data["user_id"])[0]
+        if post_data ["public"] == nil && post_data["user_id"] != session[:user_id]
+            no_authentication = true
+            post data = nil
+        end
+    end
+    session[:edit_post] = post_data
+    slim(:"post/show",locals:{post_info:post_data, userdata:userdata, no_authentication:no_authentication})
+end
+
+get("/posts/:post_id/edit") do 
+    post_data = session[:edit_post]
+    no_authentication = false
+    if post_data["user_id"] != session[:user_id] && session[:rank] != "admin"
+        no_authentication = true
+        ad_data = nil
+    end
+    slim(:"posts/edit",locals:{post_info:post_data,no_authentication:no_authentication})
+end
+
+post('/posts/:post_id/update') do
+    post_id = session[:edit_post]["post_id"]
+ 
+    validation = validate_post(params[:name],params[:written],session[:edit_ad])
+    if validation.nil?
+        update_post(post_id,params[:written])
+    else
+        session[:edited_post] = validation
+    end
+    redirect back
+end
+
+
+post('/posts/destory') do 
+    post_id = session[:edit_post]["post_id"]
+    delete_post(post_id,session[:user_id],session[:rank])
+    redirect('/')
 end
