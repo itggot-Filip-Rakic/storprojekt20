@@ -8,9 +8,10 @@
 ### Skiss på en inloggad
 ![bild](misc/skisser/loggedin.png)
 ### Skiss på en enstaka post
-![bild](misc/skisser/viewpost.png)
+![bild](misc/skisser/postview.png)
 ## 3. Databas med ER-diagram 
 ![bild](misc/Er-diagram/InkedWebbserverprogrammering_LI.jpg)
+ps. Detta Er-diagrammet är inte exakt, det är ganska gammalt
 ## 4. Arkitektur
 __Mappar:__
 
