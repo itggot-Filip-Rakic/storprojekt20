@@ -4,11 +4,13 @@
 * På sidan ska användare lägga upp forumpost på spelet som de spelar.
 ## 2. Vyer
 ### Skiss på landingpage
-
-### Skiss på en enstaka ad
-
+![bild](misc/skisser/homepage.png)
+### Skiss på en inloggad
+![bild](misc/skisser/loggedin.png)
+### Skiss på en enstaka post
+![bild](misc/skisser/viewpost.png)
 ## 3. Databas med ER-diagram 
-
+![bild](misc/Er-diagram/InkedWebbserverprogrammering_LI.jpg)
 ## 4. Arkitektur
 __Mappar:__
 
