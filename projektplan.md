@@ -29,8 +29,8 @@ app.rb - Huvuddelen i projektet där alla routes finns
 model.rb - Inehåller alla databas förfrågningar + validering av information
 
 ## 5. Resultat
-![bild](4GVR5Mf.png)
-![bild](KIsTQqA.png)
-![bild](KbCrRBk.png)
-![bild](mBNFR2E.png)
-![bild](pDuTn0i.png)
+![bild](misc/resultat/4GVR5Mf.png)
+![bild](misc/resultat/KIsTQqA.png)
+![bild](misc/resultat/KbCrRBk.png)
+![bild](misc/resultat/mBNFR2E.png)
+![bild](misc/resultat/pDuTn0i.png)
