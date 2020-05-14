@@ -4,7 +4,6 @@
 * På sidan ska användare lägga upp forumpost på spelet som de spelar.
 ## 2. Vyer
 ### Skiss på landingpage
-![Skiss framsida](https://i.imgur.com/I6jGW0l.png)
 
 ### Skiss på en enstaka ad
 
