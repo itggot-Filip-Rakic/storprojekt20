@@ -4,6 +4,11 @@ module Model
     require 'net/http'
     require 'byebug'
 
+    #
+    # Connects to the database
+    #
+    # @return [Hash] Returns the database as a hash
+    #    
     def db()
         db = SQLite3::Database.new("db/database.db")
         db.results_as_hash = true
@@ -52,6 +57,16 @@ module Model
         end
     end
 
+    #
+    # Validates registration input and scrambles password.
+    #
+    # @param [String] exist_user If a user with that username already exist
+    # @param [String] exist_gameuser If a user with that ingame username already exist
+    # @param [String] existing_phone If a user with that phone number already exist
+    # @param [String] password_scramble The digested password to be saved
+    #
+    # @return [String] Returns a error message if one of the statemenats is true. Dosn't return anything if all variables is validated correctly.
+    #
     public def register(username, game_user, password, password_verify)
         exist_user = db.execute("SELECT username FROM user WHERE username = ?", username)
         exist_gameuser = db.execute("SELECT gameuser FROM user WHERE gameuser = ?", game_user )
@@ -81,6 +96,14 @@ module Model
         return ModelResponse.new(false, "How did u get here??")
     end
 
+    #
+    # Validates and verify login.
+    #
+    # @param [String] exist If a user with that username already exist
+    # @param [String] checks if password matches to database
+    #
+    # @return [String] Returns a error message if one of the statemenats is true. Dosn't return anything if all variables is validated correctly.
+    #
     public def login_verify(username, password)
         exist = db.execute("SELECT username FROM user WHERE username LIKE ?", username)
         if exist.empty?
@@ -97,7 +120,7 @@ module Model
     end
 
         #
-        # Gets all the public ads from a user
+        # Gets all the public posts from a user
         #
         # @param [Integer] user_id Id of a user
         #
@@ -112,22 +135,44 @@ module Model
         return "Ur post has been saved"
     end 
 
+    #
+    # Validates input from a new post creation or a update of an post.
+    #
+    # @param [String] name The name of the post title
+    # @param [String] written The text of an post
+    #
+    # @return [String,nil] Returns the error message if the validation is not successful. Otherwise return nil.
+    #
     def validate_post(name,written)
         if name.empty? || written.empty?
             return "You missed to fill out a field"
-        elsif name.length >= 500 || description.length >= 5000
+        elsif name.length >= 500 || written.length >= 5000
             return "U have reached the charater limit"
         else
             return nil
         end
     end
 
-    def update_ad(post_id,name,written)
-        db.execute("UPDATE post SET name = ?,written = ?, WHERE post_id = ?",name,written,post_id)
+    #
+    # Updates potst with updated information
+    #
+    # @param [Integer] post_id Post to update
+    # @param [String] name Name of post
+    # @param [String] written text of post
+    #
+    def update_post(post_id,name,written)
+        db.execute("UPDATE post SET name = ?,written = ? WHERE post_id = ?",name,written,post_id)
     end
 
+    #
+    # Checks if the user is allowed to delete the post the proceeds to deletes the post.
+    #
+    # @param [Integer] post_id Post to be deletetd
+    # @param [String] current_user Name of the current user logged in
+    # @param [String] rank If the person has admin he/she can delete ad anyway.
+    #
     def delete_post(post_id,current_user,rank)
-        owner_id = get_from_db("user_id","post","posr_id",post_id)[0]["user_id"]
+        owner_id = get_from_db("user_id","post","post_id",post_id)[0]["user_id"]
         if current_user == owner_id || rank == "admin"
             db.execute("PRAGMA foreign_keys = ON")
             db.execute("DELETE FROM post WHERE post_id = ?", post_id)
@@ -136,6 +181,14 @@ module Model
             p "fail"
         end
     end
+
+    #
+    # Checks if user is authenticated
+    #
+    # @param [Integer] user_id User id to verify
+    #
+    # @return [Boolean] Returns true or false
+    #
         def not_authenticated(user_id)
             if user_id == nil
                 return true

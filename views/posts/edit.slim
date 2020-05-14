@@ -3,12 +3,12 @@
 -if no_authentication
     p You dont have premission to do this
     -premission = false
--elsif ad_info.nil?
+-elsif post_info.nil?
     p An post with the id doesn't exist
     -premission = false
 
 -elsif session[:user_id] != post_info["user_id"] && session[:rank] != "admin"
-    p You need to be ad owner to do this
+    p You need to be post owner to do this
     -premission = false
 -else
     div 
@@ -16,8 +16,8 @@
             h3 Name of post
             input type="text" name="name" value="#{post_info["name"]}"
             p Text
-            input type="text" name="desc" value="#{post_info["written"]}"
-            -if ad_info["public"] == "on"
+            input type="text" name="written" value="#{post_info["written"]}"
+            -if post_info["public"] == "on"
                 <input type="checkbox" name="public" checked>
             -else
                 <input type="checkbox" name="public">

@@ -41,10 +41,17 @@ get("/users/new") do
     slim(:"users/new")
 end
 
-get("/users/error") do
-    slim(:"users/error")
-end
-
+# 
+# Takes form input from '/users/new' with user information and validates it, and then ads it to the database
+# 
+# @param [String] username user username
+# @param [String] password user password
+# @param [String] game_user user ingame name
+# @param [String] password_verify user password verification
+# 
+# @see Model#get_from_db
+# @see Model#register
+# 
 post("/users/register") do 
     username = params[:username]
     game_user = params[:game_user]
@@ -114,6 +121,14 @@ post("/logout") do
     redirect("/")
 end
 
+# 
+# Shows all Posts of a specific user
+# 
+# @params [Integer] user_id User id to show profile of.
+# 
+# @see Model#get_from_db
+# @see Model#get_public_posts
+# 
 get('/users/show/:user_id') do 
     user_id = params[:user_id].to_i
 
@@ -129,6 +144,11 @@ get('/users/show/:user_id') do
     slim(:"users/show",locals:{my_posts: my_posts,user: user})
 end
 
+# 
+# Displays '/posts/new' page where a user can create post. But if you're not logged in it sends you back to the home page '/' 
+# 
+# @see Model#not_authenticated
+#
 get('/posts/new') do 
     if not_authenticated(session[:user_id])
         redirect('/')
@@ -136,6 +156,19 @@ get('/posts/new') do
     slim(:"posts/new")
 end
 
+# 
+# Receives form input from '/posts/new' and creates a new post based on the variables.
+# 
+# @param [String] name Name of the post
+# @param [String] written Description of post
+# @param [String] public If the post should be public or private
+# @param [String] time saves time when created
+# 
+# @see Model#get_ad_id
+# @see Model#validate_ad_items
+# @see Model#add_new_ad
+# @see Model#new_ad_to_categories
+# 
 post('/posts/new') do
     name = params[:name]
     text = params[:written]
@@ -147,6 +180,13 @@ post('/posts/new') do
     redirect("/posts/new")
 end
 
+# 
+# Displays a specific post based on the post_id provided in the path
+# 
+# @param [Integer] :post_id The id of a specific ad
+# 
+# @see Model#get_from_db
+# 
 get("/posts/:post_id") do
     no_authentication = false
     post_id = params["post_id"]
@@ -160,32 +200,49 @@ get("/posts/:post_id") do
         end
     end
     session[:edit_post] = post_data
-    slim(:"post/show",locals:{post_info:post_data, userdata:userdata, no_authentication:no_authentication})
+    slim(:"posts/show",locals:{post_info:post_data, userdata:userdata, no_authentication:no_authentication})
 end
 
+# 
+# Displays the edit page for a specific post.
+# It also checks if you have the corret authorization to edit the post.
+# 
+# @param [Integer] :post_id Id of the post thats going to be edited.
+# 
 get("/posts/:post_id/edit") do 
     post_data = session[:edit_post]
     no_authentication = false
     if post_data["user_id"] != session[:user_id] && session[:rank] != "admin"
         no_authentication = true
-        ad_data = nil
+        post_data = nil
     end
     slim(:"posts/edit",locals:{post_info:post_data,no_authentication:no_authentication})
 end
 
+# 
+# Takes input from '/posts/:post_id/edit' and validates it and updates the post information in the database. 
+# 
+# @param [Integer] :post_id Id of the post thats going to be updated.
+# 
+# @see Model#validate_post
+# @see Model#update_post
+# 
 post('/posts/:post_id/update') do
-    post_id = session[:edit_post]["post_id"]
- 
-    validation = validate_post(params[:name],params[:written],session[:edit_ad])
+    post_id = session[:edit_post]["post_id"] 
+    validation = validate_post(params[:name],params[:written])
     if validation.nil?
-        update_post(post_id,params[:written])
+        update_post(post_id,params[:name],params[:written])
     else
         session[:edited_post] = validation
     end
     redirect back
 end
 
-
+# 
+# Deletes a specified post.
+# 
+# @see Model#delete_post
+# 
 post('/posts/destory') do 
     post_id = session[:edit_post]["post_id"]
     delete_post(post_id,session[:user_id],session[:rank])
